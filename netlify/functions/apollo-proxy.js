@@ -28,9 +28,21 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Pegar o endpoint do path
-    const path = event.path.replace('/.netlify/functions/apollo-proxy', '');
-    const endpoint = path || '';
+    // Pegar o endpoint da query string ou do path
+    let endpoint = '';
+    
+    // Primeiro tentar query string
+    if (event.queryStringParameters && event.queryStringParameters.endpoint) {
+      endpoint = event.queryStringParameters.endpoint;
+    } else {
+      // Fallback: pegar do path
+      const path = event.path.replace('/.netlify/functions/apollo-proxy', '');
+      endpoint = path || '';
+    }
+    
+    console.log('🔍 Endpoint extraído:', endpoint);
+    console.log('🔍 Path completo:', event.path);
+    console.log('🔍 Query params:', event.queryStringParameters);
     
     // Construir a URL da API Apollo
     const apolloUrl = `https://api.apollo.io/v1${endpoint}`;

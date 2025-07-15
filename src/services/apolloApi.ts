@@ -42,7 +42,7 @@ class ApolloApiService {
 
     // Usar Netlify Function para fazer proxy das requisições
     const baseUrl = '/api/apollo';
-    const url = `${baseUrl}${endpoint}`;
+    const url = `${baseUrl}?endpoint=${encodeURIComponent(endpoint)}`;
     console.log('🌐 Fazendo requisição para:', url);
     console.log('🔑 API Key presente:', !!this.apiKey);
     
