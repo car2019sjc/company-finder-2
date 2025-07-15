@@ -46,11 +46,25 @@ exports.handler = async (event, context) => {
     
     // Construir a URL da API Apollo
     const apolloUrl = `https://api.apollo.io/v1${endpoint}`;
+    console.log('🌐 URL da API Apollo:', apolloUrl);
+    console.log('🔑 API Key presente:', !!apiKey);
+    console.log('📋 Method:', event.httpMethod);
+    console.log('📦 Body:', event.body);
     
     // Pegar o body da requisição
-    const body = event.body ? JSON.parse(event.body) : {};
+    let body = {};
+    if (event.body) {
+      try {
+        body = JSON.parse(event.body);
+        console.log('📦 Body parseado:', body);
+      } catch (error) {
+        console.log('❌ Erro ao fazer parse do body:', error);
+        console.log('📦 Body original:', event.body);
+      }
+    }
 
     // Fazer a requisição para a API Apollo
+    console.log('📡 Fazendo requisição para Apollo API...');
     const response = await fetch(apolloUrl, {
       method: event.httpMethod,
       headers: {
@@ -61,7 +75,11 @@ exports.handler = async (event, context) => {
       body: event.httpMethod !== 'GET' ? JSON.stringify(body) : undefined,
     });
 
+    console.log('📥 Status da resposta Apollo:', response.status);
+    console.log('📥 Headers da resposta:', Object.fromEntries(response.headers.entries()));
+
     const data = await response.json();
+    console.log('📥 Data da resposta Apollo:', data);
 
     return {
       statusCode: response.status,
