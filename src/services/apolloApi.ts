@@ -16,6 +16,14 @@ class ApolloApiError extends Error {
 class ApolloApiService {
   private apiKey: string | null = null;
 
+  constructor() {
+    // Carregar API key das variáveis de ambiente do Vite
+    const envApiKey = import.meta.env.VITE_APOLLO_API_KEY;
+    if (envApiKey && envApiKey !== 'your_apollo_api_key_here') {
+      this.apiKey = envApiKey;
+    }
+  }
+
   setApiKey(key: string) {
     this.apiKey = key;
   }

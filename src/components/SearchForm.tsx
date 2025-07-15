@@ -4,18 +4,14 @@ import type { SearchFilters } from '../types/apollo';
 
 interface SearchFormProps {
   onSearch: (filters: SearchFilters) => void;
-  onOpenApiKey: () => void;
   isLoading: boolean;
-  hasApiKey: boolean;
   hasResults?: boolean;
   onNewSearch?: () => void;
 }
 
 export const SearchForm: React.FC<SearchFormProps> = ({
   onSearch,
-  onOpenApiKey,
   isLoading,
-  hasApiKey,
   hasResults = false,
   onNewSearch,
 }) => {
@@ -53,10 +49,6 @@ export const SearchForm: React.FC<SearchFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!hasApiKey) {
-      onOpenApiKey();
-      return;
-    }
     
     if (!filters.companyName.trim() && 
         !filters.location.trim() && 
@@ -267,15 +259,8 @@ export const SearchForm: React.FC<SearchFormProps> = ({
           Nova Pesquisa
         </button>
       )}
-      <button
-        onClick={onOpenApiKey}
-        className="flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-      >
-        <Settings className="w-4 h-4 mr-2" />
-        API Key
-      </button>
     </div>
-  ), [hasResults, onNewSearch, handleNewSearch, onOpenApiKey]);
+  ), [hasResults, onNewSearch, handleNewSearch]);
 
   // Prevent rendering during loading to avoid DOM conflicts
   if (isLoading) {
@@ -283,15 +268,6 @@ export const SearchForm: React.FC<SearchFormProps> = ({
       <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Search Companies</h2>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={onOpenApiKey}
-              className="flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              API Key
-            </button>
-          </div>
         </div>
         <div className="flex items-center justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent mr-3"></div>

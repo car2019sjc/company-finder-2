@@ -7,7 +7,7 @@ import { CompanyCard } from './components/CompanyCard';
 import { IndustryFilter } from './components/IndustryFilter';
 import { Pagination } from './components/Pagination';
 import { ErrorMessage } from './components/ErrorMessage';
-import { ApiKeyModal } from './components/ApiKeyModal';
+
 import { PeopleSearchModal } from './components/PeopleSearchModal';
 import { PeopleLeadsModal } from './components/PeopleLeadsModal';
 import { BatchEmailCapture } from './components/BatchEmailCapture';
@@ -19,7 +19,7 @@ import type { SearchFilters, Company, PeopleSearchFilters, Person as PersonType 
 
 function App() {
   // State management
-  const [apiKey, setApiKey] = useLocalStorage<string>('apollo-api-key', '');
+  const [apiKey] = useLocalStorage<string>('apollo-api-key', '');
   const [companies, setCompanies] = useState<Company[]>([]);
   const [people, setPeople] = useState<PersonType[]>([]);
   const [savedPeople, setSavedPeople] = useState<PersonType[]>([]);
@@ -35,7 +35,6 @@ function App() {
   const [currentFilters, setCurrentFilters] = useState<SearchFilters | null>(null);
   
   // Modal states
-  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [isPeopleSearchModalOpen, setIsPeopleSearchModalOpen] = useState(false);
   const [isPeopleLeadsModalOpen, setIsPeopleLeadsModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
@@ -56,12 +55,11 @@ function App() {
     }, 6000);
   };
 
-  // Set API key when component mounts or when apiKey changes
+  // Set API key when component mounts
   React.useEffect(() => {
-    if (apiKey) {
-      apolloApiService.setApiKey(apiKey);
-    }
-  }, [apiKey]);
+    // A API key agora é carregada automaticamente das variáveis de ambiente
+    // no construtor do apolloApiService
+  }, []);
 
   // Update exportPageTo when totalPages changes
   React.useEffect(() => {
@@ -71,11 +69,6 @@ function App() {
   }, [totalPages]);
 
   const handleSearch = async (filters: SearchFilters) => {
-    if (!apiKey) {
-      setIsApiKeyModalOpen(true);
-      return;
-    }
-
     // Prevent multiple simultaneous searches
     if (isLoading) {
       return;
@@ -118,17 +111,9 @@ function App() {
     await handleSearch(newFilters);
   };
 
-  const handleApiKeySave = (newApiKey: string) => {
-    setApiKey(newApiKey);
-    apolloApiService.setApiKey(newApiKey);
-  };
+
 
   const handlePeopleSearch = async (filters: PeopleSearchFilters) => {
-    if (!apiKey) {
-      setIsApiKeyModalOpen(true);
-      return;
-    }
-
     setIsPeopleLoading(true);
     setError(null);
 
@@ -155,11 +140,6 @@ function App() {
   };
 
   const handleQuickPeopleSearch = async (company: Company, filters: PeopleSearchFilters) => {
-    if (!apiKey) {
-      setIsApiKeyModalOpen(true);
-      return;
-    }
-
     setIsPeopleLoading(true);
     setError(null);
     setSelectedCompany(company);
@@ -632,9 +612,7 @@ function App() {
         <ErrorBoundary>
           <SearchForm
             onSearch={handleSearch}
-            onOpenApiKey={() => setIsApiKeyModalOpen(true)}
             isLoading={isLoading}
-            hasApiKey={!!apiKey}
             hasResults={companies.length > 0}
             onNewSearch={handleNewSearch}
           />
@@ -711,12 +689,6 @@ function App() {
         )}
 
         {/* Modals */}
-        <ApiKeyModal
-          isOpen={isApiKeyModalOpen}
-          onClose={() => setIsApiKeyModalOpen(false)}
-          onSave={handleApiKeySave}
-          currentApiKey={apiKey}
-        />
 
         {selectedCompany && (
           <PeopleSearchModal
