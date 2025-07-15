@@ -3,6 +3,12 @@
   publish = "dist"
 
 [[redirects]]
+  from = "/test"
+  to = "/.netlify/functions/test"
+  status = 200
+  headers = {Access-Control-Allow-Origin = "*"}
+
+[[redirects]]
   from = "/api/apollo/*"
   to = "/.netlify/functions/apollo-proxy"
   status = 200
