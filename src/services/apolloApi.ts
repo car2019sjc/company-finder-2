@@ -40,9 +40,8 @@ class ApolloApiService {
       throw new Error('API key is required. Please enter your Apollo.io API key.');
     }
 
-    // Usar Netlify Function para fazer proxy das requisições
-    const baseUrl = '/api/apollo';
-    const url = `${baseUrl}?endpoint=${encodeURIComponent(endpoint)}`;
+    // Usar proxy local do Vite em ambos os ambientes
+    const url = `/api/apollo${endpoint}`;
     console.log('🌐 Fazendo requisição para:', url);
     console.log('🔑 API Key presente:', !!this.apiKey);
     
