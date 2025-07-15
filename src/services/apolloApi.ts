@@ -1,10 +1,8 @@
 import type { SearchResponse, SearchFilters, ApiError } from '../types/apollo';
 import type { PeopleSearchResponse, PeopleSearchFilters, EmailSearchResponse, EmailSearchFilters } from '../types/apollo';
+import { getApiBaseUrl } from '../config/api';
 
-// Usar URL direta em produção, proxy em desenvolvimento
-const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://api.apollo.io/v1' 
-  : '/api/apollo/v1';
+const API_BASE_URL = getApiBaseUrl();
 
 class ApolloApiError extends Error {
   public status: number;
@@ -64,10 +62,12 @@ class ApolloApiService {
 
       if (!response.ok) {
         let errorMessage = `Request failed with status ${response.status}`;
+        console.log('❌ Erro na resposta:', response.status, response.statusText);
         
         try {
           const errorData = await response.json();
           errorMessage = errorData.message || errorData.error || errorMessage;
+          console.log('📄 Detalhes do erro:', errorData);
         } catch {
           // If we can't parse the error response, use the status-based message
           if (response.status === 401) {
@@ -78,6 +78,8 @@ class ApolloApiService {
             errorMessage = 'Invalid search parameters. Please check your search criteria and try again.';
           } else if (response.status === 429) {
             errorMessage = 'Rate limit exceeded. Please wait a moment before trying again.';
+          } else if (response.status === 404) {
+            errorMessage = 'API endpoint not found. This might be a CORS issue or incorrect endpoint.';
           }
         }
         
