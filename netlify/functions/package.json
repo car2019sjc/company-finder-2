@@ -1,0 +1,9 @@
+{
+  "name": "apollo-proxy-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for Apollo API proxy",
+  "main": "apollo-proxy.js",
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  }
+} 

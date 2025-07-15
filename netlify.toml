@@ -1,0 +1,14 @@
+[build]
+  functions = "netlify/functions"
+  publish = "dist"
+
+[[redirects]]
+  from = "/api/apollo/*"
+  to = "/.netlify/functions/apollo-proxy?endpoint=:splat"
+  status = 200
+  headers = {Access-Control-Allow-Origin = "*"}
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200 
