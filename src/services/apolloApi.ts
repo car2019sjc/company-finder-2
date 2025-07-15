@@ -1,7 +1,10 @@
 import type { SearchResponse, SearchFilters, ApiError } from '../types/apollo';
 import type { PeopleSearchResponse, PeopleSearchFilters, EmailSearchResponse, EmailSearchFilters } from '../types/apollo';
 
-const API_BASE_URL = '/api/apollo/v1';
+// Usar URL direta em produção, proxy em desenvolvimento
+const API_BASE_URL = import.meta.env.PROD 
+  ? 'https://api.apollo.io/v1' 
+  : '/api/apollo/v1';
 
 class ApolloApiError extends Error {
   public status: number;
@@ -21,6 +24,9 @@ class ApolloApiService {
     const envApiKey = import.meta.env.VITE_APOLLO_API_KEY;
     if (envApiKey && envApiKey !== 'your_apollo_api_key_here') {
       this.apiKey = envApiKey;
+      console.log('🔑 API Key carregada das variáveis de ambiente');
+    } else {
+      console.error('❌ API Key não encontrada nas variáveis de ambiente');
     }
   }
 
@@ -37,14 +43,20 @@ class ApolloApiService {
     }
 
     const url = `${API_BASE_URL}${endpoint}`;
+    console.log('🌐 Fazendo requisição para:', url);
+    console.log('🔑 API Key presente:', !!this.apiKey);
+    
     const headers = {
       'Content-Type': 'application/json',
       'Cache-Control': 'no-cache',
       'X-Api-Key': this.apiKey,
+      'Accept': 'application/json',
+      'User-Agent': 'CompanyFinder/1.0',
       ...options.headers,
     };
 
     try {
+      console.log('📡 Enviando requisição com headers:', Object.keys(headers));
       const response = await fetch(url, {
         ...options,
         headers,
