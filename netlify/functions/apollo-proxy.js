@@ -28,16 +28,10 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Pegar o endpoint da query string
-    const endpoint = event.queryStringParameters?.endpoint || '';
-    if (!endpoint) {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: 'Endpoint is required' }),
-      };
-    }
-
+    // Pegar o endpoint do path
+    const path = event.path.replace('/.netlify/functions/apollo-proxy', '');
+    const endpoint = path || '';
+    
     // Construir a URL da API Apollo
     const apolloUrl = `https://api.apollo.io/v1${endpoint}`;
     

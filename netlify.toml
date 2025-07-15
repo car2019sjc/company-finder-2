@@ -4,7 +4,7 @@
 
 [[redirects]]
   from = "/api/apollo/*"
-  to = "/.netlify/functions/apollo-proxy?endpoint=:splat"
+  to = "/.netlify/functions/apollo-proxy/:splat"
   status = 200
   headers = {Access-Control-Allow-Origin = "*"}
 
