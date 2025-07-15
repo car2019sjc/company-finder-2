@@ -21,8 +21,8 @@ export function getApiBaseUrl(): string {
     return API_CONFIG.development.baseUrl;
   }
   
-  // Em produção, usar proxy por padrão
-  return API_CONFIG.production.proxyUrl;
+  // Em produção, tentar URL direta primeiro (pode falhar por CORS)
+  return API_CONFIG.production.directUrl;
 }
 
 // Função para verificar se deve usar proxy

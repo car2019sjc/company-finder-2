@@ -40,69 +40,89 @@ class ApolloApiService {
       throw new Error('API key is required. Please enter your Apollo.io API key.');
     }
 
-    const url = `${API_BASE_URL}${endpoint}`;
-    console.log('🌐 Fazendo requisição para:', url);
-    console.log('🔑 API Key presente:', !!this.apiKey);
-    
+    // Tentar diferentes URLs em caso de falha
+    const urls = [
+      `https://api.apollo.io/v1${endpoint}`, // URL direta
+      `https://api.allorigins.win/raw?url=https://api.apollo.io/v1${endpoint}`, // Proxy 1
+      `https://cors-anywhere.herokuapp.com/https://api.apollo.io/v1${endpoint}`, // Proxy 2
+    ];
+
     const headers = {
       'Content-Type': 'application/json',
-      'Cache-Control': 'no-cache',
       'X-Api-Key': this.apiKey,
       'Accept': 'application/json',
-      'User-Agent': 'CompanyFinder/1.0',
       ...options.headers,
     };
 
-    try {
-      console.log('📡 Enviando requisição com headers:', Object.keys(headers));
-      const response = await fetch(url, {
-        ...options,
-        headers,
-      });
+    let lastError: Error | null = null;
 
-      if (!response.ok) {
-        let errorMessage = `Request failed with status ${response.status}`;
-        console.log('❌ Erro na resposta:', response.status, response.statusText);
-        
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorData.error || errorMessage;
-          console.log('📄 Detalhes do erro:', errorData);
-        } catch {
-          // If we can't parse the error response, use the status-based message
-          if (response.status === 401) {
-            errorMessage = 'Invalid API key. Please check your Apollo.io API key.';
-          } else if (response.status === 403) {
-            errorMessage = 'Access denied. Please ensure your Apollo.io plan includes API access.';
-          } else if (response.status === 422) {
-            errorMessage = 'Invalid search parameters. Please check your search criteria and try again.';
-          } else if (response.status === 429) {
-            errorMessage = 'Rate limit exceeded. Please wait a moment before trying again.';
-          } else if (response.status === 404) {
-            errorMessage = 'API endpoint not found. This might be a CORS issue or incorrect endpoint.';
+    for (let i = 0; i < urls.length; i++) {
+      const url = urls[i];
+      console.log(`🌐 Tentativa ${i + 1}: Fazendo requisição para:`, url);
+      console.log('🔑 API Key presente:', !!this.apiKey);
+      
+      try {
+        console.log('📡 Enviando requisição com headers:', Object.keys(headers));
+        const response = await fetch(url, {
+          ...options,
+          headers,
+        });
+
+        if (!response.ok) {
+          let errorMessage = `Request failed with status ${response.status}`;
+          console.log('❌ Erro na resposta:', response.status, response.statusText);
+          
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorData.error || errorMessage;
+            console.log('📄 Detalhes do erro:', errorData);
+          } catch {
+            // If we can't parse the error response, use the status-based message
+            if (response.status === 401) {
+              errorMessage = 'Invalid API key. Please check your Apollo.io API key.';
+            } else if (response.status === 403) {
+              errorMessage = 'Access denied. Please ensure your Apollo.io plan includes API access.';
+            } else if (response.status === 422) {
+              errorMessage = 'Invalid search parameters. Please check your search criteria and try again.';
+            } else if (response.status === 429) {
+              errorMessage = 'Rate limit exceeded. Please wait a moment before trying again.';
+            } else if (response.status === 404) {
+              errorMessage = 'API endpoint not found. This might be a CORS issue or incorrect endpoint.';
+            }
           }
+          
+          const error: ApiError = {
+            message: errorMessage,
+            status: response.status,
+          };
+          throw new ApolloApiError(errorMessage, response.status);
         }
-        
-        const error: ApiError = {
-          message: errorMessage,
-          status: response.status,
-        };
-        throw new ApolloApiError(errorMessage, response.status);
-      }
 
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw new Error('Unable to connect to Apollo.io API. Please check your internet connection.');
+        const data = await response.json();
+        console.log('✅ Requisição bem-sucedida na tentativa', i + 1);
+        return data;
+      } catch (error) {
+        console.log(`❌ Tentativa ${i + 1} falhou:`, error);
+        lastError = error instanceof Error ? error : new Error(String(error));
+        
+        // Se não for a última tentativa, continuar para a próxima
+        if (i < urls.length - 1) {
+          console.log('🔄 Tentando próxima URL...');
+          continue;
+        }
       }
-      
-      if (error instanceof Error) {
-        throw error;
-      }
-      
-      throw new Error('An unexpected error occurred while making the request.');
     }
+
+    // Se todas as tentativas falharam
+    if (lastError instanceof TypeError && lastError.message.includes('fetch')) {
+      throw new Error('Unable to connect to Apollo.io API. Please check your internet connection.');
+    }
+    
+    if (lastError instanceof Error) {
+      throw lastError;
+    }
+    
+    throw new Error('An unexpected error occurred while making the request.');
   }
 
   async searchCompanies(filters: SearchFilters): Promise<SearchResponse> {
