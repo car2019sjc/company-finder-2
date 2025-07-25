@@ -1,20 +1,16 @@
 [build]
-  functions = "netlify/functions"
   publish = "dist"
+  command = "npm run build"
 
-[[redirects]]
-  from = "/test"
-  to = "/.netlify/functions/test"
-  status = 200
-  headers = {Access-Control-Allow-Origin = "*"}
+[build.environment]
+  NODE_VERSION = "18"
 
 [[redirects]]
   from = "/api/apollo/*"
   to = "/.netlify/functions/apollo-proxy"
   status = 200
-  headers = {Access-Control-Allow-Origin = "*"}
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200 
+  status = 200
