@@ -53,6 +53,9 @@ export const SearchForm: React.FC<SearchFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('🔍 SearchForm - Setores selecionados:', selectedIndustries);
+    console.log('🔍 SearchForm - Filtros atuais:', filters);
+    
     if (!filters.companyName.trim() && 
         !filters.location.trim() && 
         filters.employeeRange === 'all' &&
@@ -79,7 +82,8 @@ export const SearchForm: React.FC<SearchFormProps> = ({
       page: 1
     };
     
-    console.log('🚀 Iniciando busca com filtros:', searchFilters);
+    console.log('🚀 SearchForm - Iniciando busca com filtros finais:', searchFilters);
+    console.log('🏭 SearchForm - Business Area enviada:', searchFilters.businessArea);
     onSearch(searchFilters);
   };
 

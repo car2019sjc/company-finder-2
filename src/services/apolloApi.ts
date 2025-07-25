@@ -181,11 +181,15 @@ class ApolloApiService {
 
     // Área de negócio - usar q_organization_keyword_tags
     if (filters.businessArea && filters.businessArea.trim()) {
+      console.log('🏭 Apollo API - Business Area recebida:', filters.businessArea);
+      
       // Se businessArea contém vírgulas, é uma lista de setores do IndustrySelector
       const businessAreas = filters.businessArea.split(',').map(area => area.trim()).filter(area => area);
       
+      console.log('🏭 Apollo API - Setores após split:', businessAreas);
+      
       if (businessAreas.length > 0) {
-        console.log(`🔄 Processando ${businessAreas.length} setores:`, businessAreas);
+        console.log(`🔄 Apollo API - Processando ${businessAreas.length} setores:`, businessAreas);
         
         // Os setores já vêm no formato correto do Apollo.io do IndustrySelector
         // Mas mantemos o mapa para compatibilidade com busca manual
@@ -215,17 +219,24 @@ class ApolloApiService {
         };
         
         const translatedAreas = businessAreas.map(area => {
+          console.log(`🔄 Apollo API - Processando setor individual: "${area}"`);
+          
           // Se já está no formato do Apollo (com hífens), usar diretamente
           if (area.includes('-')) {
+            console.log(`✅ Apollo API - Setor já no formato correto: "${area}"`);
             return area;
           }
           // Senão, tentar traduzir
-          return businessAreaMap[area] || area.toLowerCase().replace(/\s+/g, '-');
+          const translated = businessAreaMap[area] || area.toLowerCase().replace(/\s+/g, '-');
+          console.log(`🔄 Apollo API - Setor traduzido: "${area}" → "${translated}"`);
+          return translated;
         });
         
-        console.log(`🔄 Setores traduzidos:`, translatedAreas);
+        console.log(`✅ Apollo API - Setores finais para envio:`, translatedAreas);
         body.q_organization_keyword_tags = translatedAreas;
       }
+    } else {
+      console.log('❌ Apollo API - Nenhum setor de negócio fornecido');
     }
 
     // Faixa de funcionários - usar organization_num_employees_ranges
