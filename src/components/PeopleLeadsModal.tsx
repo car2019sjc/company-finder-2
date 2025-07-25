@@ -69,6 +69,13 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
     message: string;
   } | null>(null);
 
+  // Estado para notificação flutuante específica do email
+  const [emailNotification, setEmailNotification] = useState<{
+    personId: string;
+    email: string;
+    position: { top: number; left: number };
+  } | null>(null);
+
   // CRITICAL: Estado para controlar se o modal está sendo processado
   const [isProcessing, setIsProcessing] = useState(false);
   
@@ -207,6 +214,16 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
     setIsProcessing(true);
     setShouldRenderTable(false);
     setEmailSearchLoading(person.id);
+
+    // Scroll para a linha da pessoa para manter visível durante a busca
+    const personRow = document.getElementById(`person-row-${person.id}`);
+    if (personRow) {
+      personRow.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center',
+        inline: 'nearest'
+      });
+    }
     
     try {
       // Add timeout to prevent hanging
@@ -250,6 +267,43 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
         // Show success notification
         const emailList = result.emails.map((e: any) => e.email).join(', ');
         showNotification('success', `✅ Email atualizado! ${person.name}: ${emailList.substring(0, 60)}${emailList.length > 60 ? '...' : ''}`);
+        
+        // Scroll para manter o resultado visível após a atualização
+        setTimeout(() => {
+          const personRow = document.getElementById(`person-row-${person.id}`);
+          if (personRow) {
+            personRow.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center',
+              inline: 'nearest'
+            });
+            
+            // Adicionar destaque temporário
+            personRow.classList.add('ring-2', 'ring-green-400', 'bg-green-100');
+            setTimeout(() => {
+              personRow.classList.remove('ring-2', 'ring-green-400', 'bg-green-100');
+            }, 3000);
+
+            // Mostrar notificação flutuante próxima ao email
+            const emailCell = personRow.querySelector('[data-email-cell]') as HTMLElement;
+            if (emailCell) {
+              const rect = emailCell.getBoundingClientRect();
+              setEmailNotification({
+                personId: person.id,
+                email: primaryEmail,
+                position: {
+                  top: rect.top + window.scrollY - 10,
+                  left: rect.right + 10
+                }
+              });
+
+              // Auto-hide email notification
+              setTimeout(() => {
+                setEmailNotification(null);
+              }, 4000);
+            }
+          }
+        }, 200);
       } else if (result.success && result.phone_numbers && result.phone_numbers.length > 0) {
         showNotification('success', `📞 ${result.phone_numbers.length} telefone(s) encontrado(s) para ${person.name}`);
       } else {
@@ -714,7 +768,14 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {shouldRenderTable && filteredAndSortedPeople.map((person) => (
-                <tr key={person.id} className="hover:bg-gray-50">
+                <tr 
+                  key={person.id} 
+                  id={`person-row-${person.id}`}
+                  className={`hover:bg-gray-50 transition-colors duration-300 ${
+                    emailSearchLoading === person.id ? 'bg-blue-50 ring-2 ring-blue-200' : 
+                    emailSearchResults[person.id]?.emailUpdated ? 'bg-green-50' : ''
+                  }`}
+                >
                   <td className="px-4 py-4">
                     <input
                       type="checkbox"
@@ -756,7 +817,7 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
                   </td>
 
                   {/* Contato */}
-                  <td className="px-4 py-4">
+                  <td className="px-4 py-4" data-email-cell>
                     <div className="space-y-1">
                       {(() => {
                         // Check if this person has been updated with a new email
@@ -772,9 +833,22 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
                         
                         if (hasValidEmail) {
                           return (
-                            <div className="flex items-center text-sm">
-                              <Mail className="w-4 h-4 mr-2 text-green-500" />
-                              <span className="text-green-700 font-medium">{person.email}</span>
+                            <div className={`flex items-center text-sm ${
+                              wasEmailFound ? 'animate-pulse' : ''
+                            }`}>
+                              <Mail className={`w-4 h-4 mr-2 ${
+                                wasEmailFound ? 'text-green-600' : 'text-green-500'
+                              }`} />
+                              <span className={`font-medium ${
+                                wasEmailFound ? 'text-green-800 bg-green-100 px-2 py-1 rounded' : 'text-green-700'
+                              }`}>
+                                {person.email}
+                              </span>
+                              {wasEmailFound && (
+                                <span className="ml-2 text-xs text-green-600 font-semibold">
+                                  ✨ Novo!
+                                </span>
+                              )}
                             </div>
                           );
                         } else {
@@ -923,6 +997,28 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Notificação flutuante para email encontrado */}
+      {emailNotification && (
+        <div
+          className="fixed z-50 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg animate-bounce"
+          style={{
+            top: `${emailNotification.position.top}px`,
+            left: `${emailNotification.position.left}px`,
+            transform: 'translateY(-50%)'
+          }}
+        >
+          <div className="flex items-center space-x-2">
+            <Mail className="w-4 h-4" />
+            <span className="text-sm font-medium">
+              Email encontrado: {emailNotification.email}
+            </span>
+          </div>
+          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-2">
+            <div className="w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-green-600"></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
