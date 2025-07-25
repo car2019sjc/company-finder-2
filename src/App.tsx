@@ -617,49 +617,53 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        <header className="text-center mb-8">
-          <div className="max-w-3xl mx-auto">
-            <div className="flex items-center justify-center mb-4">
-              <div className="bg-gradient-to-r from-blue-600 to-green-600 p-3 rounded-xl shadow-lg mr-4">
-                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-              </div>
-              <div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-                  OnSet.IA Company Search
-                </h1>
-                <div className="flex items-center justify-center mt-2">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-2">
-                    v1.0
-                  </span>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    Apollo.io Powered
-                  </span>
-                </div>
-              </div>
+        <header className="bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900 text-white py-16 mb-8 rounded-2xl shadow-2xl">
+          <div className="max-w-4xl mx-auto text-center px-6">
+            {/* Logo OnSet */}
+            <div className="mb-6">
+              <h1 className="text-6xl font-bold mb-2">
+                <span className="text-blue-400">On</span><span className="text-orange-500">Set</span>
+              </h1>
+              <p className="text-orange-400 text-xl font-medium tracking-wide">
+                Conectando Inteligência e Tecnologia
+              </p>
             </div>
-            <p className="text-lg text-gray-600 leading-relaxed">
-              Encontre e conecte-se com empresas brasileiras e seus funcionários usando inteligência artificial
-            </p>
-            <div className="flex items-center justify-center mt-4 space-x-6 text-sm text-gray-500">
-              <div className="flex items-center">
-                <svg className="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+
+            {/* Título Principal */}
+            <div className="mt-12 mb-8">
+              <h2 className="text-5xl font-bold text-white mb-6 tracking-tight">
+                Company Search
+              </h2>
+              <p className="text-slate-300 text-lg leading-relaxed max-w-3xl mx-auto">
+                Plataforma inteligente para pesquisa e qualificação de leads B2B, integrando múltiplas fontes e automação para gerar dados enriquecidos e insights estratégicos.
+              </p>
+            </div>
+
+            {/* Features */}
+            <div className="flex flex-wrap items-center justify-center mt-8 gap-6 text-sm">
+              <div className="flex items-center bg-slate-700/50 px-4 py-2 rounded-full">
+                <svg className="w-4 h-4 mr-2 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                 </svg>
-                Busca Inteligente
+                <span className="text-slate-200">Busca Inteligente</span>
               </div>
-              <div className="flex items-center">
-                <svg className="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+              <div className="flex items-center bg-slate-700/50 px-4 py-2 rounded-full">
+                <svg className="w-4 h-4 mr-2 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clipRule="evenodd"/>
                 </svg>
-                Dados Verificados
+                <span className="text-slate-200">Exportação Avançada</span>
               </div>
-              <div className="flex items-center">
-                <svg className="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+              <div className="flex items-center bg-slate-700/50 px-4 py-2 rounded-full">
+                <svg className="w-4 h-4 mr-2 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
                 </svg>
-                Exportação CSV
+                <span className="text-slate-200">Apollo.io Powered</span>
+              </div>
+              <div className="flex items-center bg-slate-700/50 px-4 py-2 rounded-full">
+                <svg className="w-4 h-4 mr-2 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                </svg>
+                <span className="text-slate-200">Leads B2B</span>
               </div>
             </div>
           </div>
