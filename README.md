@@ -18,6 +18,13 @@ O deploy é feito automaticamente via GitHub Actions quando você faz push para 
 
 ### Configuração necessária:
 
+#### Para Netlify (Recomendado):
+1. **Variáveis de Ambiente no Netlify**:
+   - Acesse: Site Settings > Environment Variables
+   - Adicione: `VITE_APOLLO_API_KEY` = sua_chave_apollo_aqui
+   - Adicione: `NODE_ENV` = production
+
+#### Para GitHub Pages:
 1. **Secrets do GitHub**: Configure as seguintes variáveis no repositório:
    - `VITE_APOLLO_API_KEY`: Sua chave da API do Apollo.io
 

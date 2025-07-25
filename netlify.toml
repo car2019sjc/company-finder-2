@@ -26,6 +26,11 @@
     Content-Type = "text/css; charset=utf-8"
 
 [[redirects]]
+  from = "/api/test"
+  to = "/.netlify/functions/test-api"
+  status = 200
+
+[[redirects]]
   from = "/api/apollo/*"
   to = "/.netlify/functions/apollo-proxy"
   status = 200
