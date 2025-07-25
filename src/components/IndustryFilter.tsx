@@ -135,17 +135,24 @@ export const IndustryFilter: React.FC<IndustryFilterProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center">
-          <Filter className="w-5 h-5 text-blue-600 mr-2" />
-          <h3 className="text-lg font-semibold text-gray-900">Filtros e Classificação</h3>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center">
+            <Filter className="w-4 h-4 text-gray-500 mr-2" />
+            <span className="text-sm font-medium text-gray-700">Filtros e Classificação</span>
+          </div>
+          {selectedIndustries.length > 0 && (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              {selectedIndustries.length} filtro{selectedIndustries.length !== 1 ? 's' : ''} ativo{selectedIndustries.length !== 1 ? 's' : ''}
+            </span>
+          )}
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           <select
             value={sortBy}
             onChange={(e) => onSortChange(e.target.value as any)}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
             <option value="name">Ordenar por Nome</option>
             <option value="industry">Ordenar por Setor</option>
@@ -155,55 +162,79 @@ export const IndustryFilter: React.FC<IndustryFilterProps> = ({
       </div>
 
       {industries.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-sm font-medium text-gray-700 flex items-center">
-              <Building2 className="w-4 h-4 mr-1" />
-              Setores de Negócio ({industries.length})
-            </h4>
-            <div className="flex space-x-2">
+        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <Building2 className="w-4 h-4 text-gray-600 mr-2" />
+              <h4 className="text-sm font-medium text-gray-900">
+                Setores de Negócio
+              </h4>
+              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-800">
+                {industries.length}
+              </span>
+            </div>
+            <div className="flex items-center space-x-3">
               <button
                 onClick={selectAllIndustries}
-                className="text-xs text-blue-600 hover:text-blue-800 underline"
+                className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
               >
                 Selecionar Todos
               </button>
-              <button
-                onClick={clearAllFilters}
-                className="text-xs text-gray-600 hover:text-gray-800 underline"
-              >
-                Limpar Filtros
-              </button>
+              {selectedIndustries.length > 0 && (
+                <button
+                  onClick={clearAllFilters}
+                  className="text-xs font-medium text-red-600 hover:text-red-800 transition-colors"
+                >
+                  Limpar ({selectedIndustries.length})
+                </button>
+              )}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-60 overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 max-h-48 overflow-y-auto">
             {industries.map(({ name, count }) => (
               <label
                 key={name}
-                className="flex items-center p-2 hover:bg-gray-50 rounded-md cursor-pointer transition-colors"
+                className={`flex items-center p-2.5 rounded-md cursor-pointer transition-all duration-200 ${
+                  selectedIndustries.includes(name)
+                    ? 'bg-blue-100 border border-blue-300 shadow-sm'
+                    : 'bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+                }`}
               >
                 <input
                   type="checkbox"
                   checked={selectedIndustries.includes(name)}
                   onChange={() => handleIndustryToggle(name)}
-                  className="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="mr-2.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-offset-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm text-gray-900 truncate block">{name}</span>
-                  <span className="text-xs text-gray-500">{count} empresa{count !== 1 ? 's' : ''}</span>
+                  <span className={`text-sm font-medium truncate block ${
+                    selectedIndustries.includes(name) ? 'text-blue-900' : 'text-gray-900'
+                  }`}>
+                    {name}
+                  </span>
+                  <span className={`text-xs truncate block ${
+                    selectedIndustries.includes(name) ? 'text-blue-700' : 'text-gray-500'
+                  }`}>
+                    {count} empresa{count !== 1 ? 's' : ''}
+                  </span>
                 </div>
               </label>
             ))}
           </div>
 
           {selectedIndustries.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-gray-200">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">
-                  {selectedIndustries.length} setor{selectedIndustries.length !== 1 ? 'es' : ''} selecionado{selectedIndustries.length !== 1 ? 's' : ''}
-                </span>
-                <div className="flex items-center text-sm text-blue-600">
+            <div className="mt-4 pt-4 border-t border-gray-300">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center">
+                  <span className="text-sm font-medium text-gray-700">
+                    Filtros Ativos
+                  </span>
+                  <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {selectedIndustries.length}
+                  </span>
+                </div>
+                <div className="flex items-center text-sm font-medium text-green-600">
                   <TrendingUp className="w-4 h-4 mr-1" />
                   {companies.filter(c => {
                     // Mapear indústrias em inglês para português para filtro
@@ -253,26 +284,21 @@ export const IndustryFilter: React.FC<IndustryFilterProps> = ({
                   }).length} empresas
                 </div>
               </div>
-              <div className="flex flex-wrap gap-1 mt-2">
-                {selectedIndustries.slice(0, 5).map(industry => (
+              <div className="flex flex-wrap gap-2">
+                {selectedIndustries.map(industry => (
                   <span
                     key={industry}
-                    className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800"
+                    className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200"
                   >
                     {industry}
                     <button
                       onClick={() => handleIndustryToggle(industry)}
-                      className="ml-1 text-blue-600 hover:text-blue-800"
+                      className="ml-2 inline-flex items-center justify-center w-4 h-4 text-blue-600 hover:text-blue-800 hover:bg-blue-200 rounded-full transition-colors"
                     >
                       ×
                     </button>
                   </span>
                 ))}
-                {selectedIndustries.length > 5 && (
-                  <span className="text-xs text-gray-500 px-2 py-1">
-                    +{selectedIndustries.length - 5} mais
-                  </span>
-                )}
               </div>
             </div>
           )}

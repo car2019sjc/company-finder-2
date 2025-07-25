@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Download, Users, Loader, CheckCircle, XCircle, AlertCircle, X } from 'lucide-react';
+import { Mail, Download, Users, Loader, CheckCircle, XCircle, AlertCircle, X, Search } from 'lucide-react';
 import type { Person, EmailSearchResponse } from './types/apollo';
 import { captureEmailsFromPersons } from './services/emailCapture';
 import { SearchForm } from './components/SearchForm';
@@ -618,12 +618,51 @@ function App() {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            OnSet.IA Company Search
-          </h1>
-          <p className="text-gray-600">
-            Find and connect with companies and their employees
-          </p>
+          <div className="max-w-3xl mx-auto">
+            <div className="flex items-center justify-center mb-4">
+              <div className="bg-gradient-to-r from-blue-600 to-green-600 p-3 rounded-xl shadow-lg mr-4">
+                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+                  OnSet.IA Company Search
+                </h1>
+                <div className="flex items-center justify-center mt-2">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mr-2">
+                    v1.0
+                  </span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    Apollo.io Powered
+                  </span>
+                </div>
+              </div>
+            </div>
+            <p className="text-lg text-gray-600 leading-relaxed">
+              Encontre e conecte-se com empresas brasileiras e seus funcionários usando inteligência artificial
+            </p>
+            <div className="flex items-center justify-center mt-4 space-x-6 text-sm text-gray-500">
+              <div className="flex items-center">
+                <svg className="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                </svg>
+                Busca Inteligente
+              </div>
+              <div className="flex items-center">
+                <svg className="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                </svg>
+                Dados Verificados
+              </div>
+              <div className="flex items-center">
+                <svg className="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                </svg>
+                Exportação CSV
+              </div>
+            </div>
+          </div>
         </header>
 
         {error && (
@@ -663,48 +702,109 @@ function App() {
 
         {companies.length > 0 && (
           <>
-            <IndustryFilter
-              companies={companies}
-              selectedIndustries={selectedIndustries}
-              onIndustryChange={setSelectedIndustries}
-              sortBy={sortBy}
-              onSortChange={setSortBy}
-            />
-            {/* Botão de exportação de empresas */}
-            <div className="flex justify-end mb-4">
-              <button
-                onClick={() => setIsExportModalOpen(true)}
-                className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors font-medium"
-              >
-                Exportar Empresas (CSV)
-              </button>
-            </div>
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-semibold text-gray-900">
-                  Search Results ({totalResults} companies found)
-                </h2>
-                <div className="text-sm text-gray-600">
-                  Showing {filteredAndSortedCompanies.length} of {companies.length} companies
-                </div>
-              </div>
-              
-              {/* Website filter notification */}
-              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-blue-800">
-                      <strong>Filtro ativo:</strong> Mostrando apenas empresas com URL de site disponível
+            {/* Header Section with Actions */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                      <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      Search Results
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {totalResults.toLocaleString()} companies found • Showing {filteredAndSortedCompanies.length} of {companies.length} companies
                     </p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <button
+                      onClick={handleNewSearch}
+                      className="flex items-center px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium shadow-sm"
+                    >
+                      <Search className="w-4 h-4 mr-2" />
+                      Nova Pesquisa
+                    </button>
+                    <button
+                      onClick={() => setIsExportModalOpen(true)}
+                      className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors font-medium shadow-sm"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Exportar (CSV)
+                    </button>
                   </div>
                 </div>
               </div>
 
+              {/* Active Filters Section */}
+              <div className="px-6 py-4 bg-blue-50 border-b border-blue-100">
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0">
+                    <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-medium text-blue-900 mb-2">Filtros Aplicados</h3>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
+                        </svg>
+                        Apenas empresas com site
+                      </span>
+                      {currentFilters?.location && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                          </svg>
+                          {currentFilters.location}
+                        </span>
+                      )}
+                      {currentFilters?.businessArea && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm2 6a2 2 0 104 0 2 2 0 00-4 0zm6 0a2 2 0 104 0 2 2 0 00-4 0z" clipRule="evenodd" />
+                          </svg>
+                          {currentFilters.businessArea.split(',').length} setor(es)
+                        </span>
+                      )}
+                      {currentFilters?.employeeRange && currentFilters.employeeRange !== 'all' && (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                          </svg>
+                          {(() => {
+                            const employeeRanges = [
+                              { value: '201,500', label: '201-500 funcionários' },
+                              { value: '501,1000', label: '501-1,000 funcionários' },
+                              { value: '1001,5000', label: '1,001-5,000 funcionários' },
+                              { value: '5001,10000', label: '5,001-10,000 funcionários' },
+                              { value: '10001,50000', label: '10,001+ funcionários' },
+                            ];
+                            return employeeRanges.find(r => r.value === currentFilters.employeeRange)?.label || currentFilters.employeeRange;
+                          })()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Filters and Sorting */}
+              <div className="px-6 py-4">
+                <IndustryFilter
+                  companies={companies}
+                  selectedIndustries={selectedIndustries}
+                  onIndustryChange={setSelectedIndustries}
+                  sortBy={sortBy}
+                  onSortChange={setSortBy}
+                />
+              </div>
+            </div>
+
+            {/* Results Grid */}
+            <div className="mb-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredAndSortedCompanies.map((company) => (
                   <CompanyCard
@@ -717,10 +817,20 @@ function App() {
               </div>
 
               {filteredAndSortedCompanies.length === 0 && companies.length > 0 && (
-                <div className="text-center py-12">
-                  <p className="text-gray-500">
-                    No companies match the selected filters. Try adjusting your industry selection.
+                <div className="text-center py-16 bg-white rounded-lg border border-gray-200">
+                  <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.562M15 6.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                  </svg>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma empresa encontrada</h3>
+                  <p className="text-gray-500 mb-4">
+                    Nenhuma empresa corresponde aos filtros selecionados.
                   </p>
+                  <button
+                    onClick={() => setSelectedIndustries([])}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200 transition-colors"
+                  >
+                    Limpar filtros
+                  </button>
                 </div>
               )}
             </div>
