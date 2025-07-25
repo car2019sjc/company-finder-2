@@ -2,6 +2,27 @@ import type { SearchResponse, SearchFilters, ApiError } from '../types/apollo';
 import type { PeopleSearchResponse, PeopleSearchFilters, EmailSearchResponse, EmailSearchFilters } from '../types/apollo';
 import { getApiBaseUrl } from '../config/api';
 
+// Função utilitária para normalizar nomes de empresas
+function normalizeCompanyName(name: string): string {
+  if (!name) return '';
+  // Remover acentos
+  const from = 'ÁÀÂÃÄÅáàâãäåÉÈÊËéèêëÍÌÎÏíìîïÓÒÔÕÖóòôõöÚÙÛÜúùûüÇçÑñ´`^~"\'';
+  const to   = 'AAAAAAaaaaaaEEEEeeeeIIIIiiiiOOOOOoooooUUUUuuuuCcNn      ';
+  let normalized = name.split('').map((char, i) => {
+    const idx = from.indexOf(char);
+    return idx > -1 ? to[idx] : char;
+  }).join('');
+  // Converter para minúsculas
+  normalized = normalized.toLowerCase();
+  // Remover múltiplos espaços
+  normalized = normalized.replace(/\s+/g, ' ').trim();
+  // Padronizar apóstrofos
+  normalized = normalized.replace(/[’‘`´]/g, "'");
+  // Remover "sa", "ltda", etc, do final
+  normalized = normalized.replace(/\b(sa|ltda|eireli|me|s\.a\.|s\.a|ltda\.|epp|ss)\b/gi, '').trim();
+  return normalized;
+}
+
 const API_BASE_URL = getApiBaseUrl();
 
 class ApolloApiError extends Error {
@@ -20,11 +41,18 @@ class ApolloApiService {
   constructor() {
     // Carregar API key das variáveis de ambiente do Vite
     const envApiKey = import.meta.env.VITE_APOLLO_API_KEY;
+    console.log('🔍 Verificando API Key nas variáveis de ambiente:', {
+      hasEnvApiKey: !!envApiKey,
+      envApiKeyLength: envApiKey?.length,
+      envApiKeyPreview: envApiKey ? `${envApiKey.substring(0, 10)}...` : 'undefined'
+    });
+    
     if (envApiKey && envApiKey !== 'your_apollo_api_key_here') {
       this.apiKey = envApiKey;
       console.log('🔑 API Key carregada das variáveis de ambiente');
     } else {
       console.error('❌ API Key não encontrada nas variáveis de ambiente');
+      console.error('❌ Valor da variável:', envApiKey);
     }
   }
 
@@ -36,8 +64,14 @@ class ApolloApiService {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
+    // CRITICAL: Validação da API key
     if (!this.apiKey) {
       throw new Error('API key is required. Please enter your Apollo.io API key.');
+    }
+
+    // CRITICAL: Validação do endpoint
+    if (!endpoint || typeof endpoint !== 'string') {
+      throw new Error('Invalid endpoint provided');
     }
 
     // Usar proxy local do Vite em ambos os ambientes
@@ -93,14 +127,25 @@ class ApolloApiService {
       console.log('✅ Requisição bem-sucedida');
       return data;
     } catch (error) {
+      console.error('❌ Erro na requisição makeRequest:', error);
+      
+      // CRITICAL: Proteção contra diferentes tipos de erro
       if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new Error('Unable to connect to Apollo.io API. Please check your internet connection.');
       }
       
       if (error instanceof Error) {
+        // Log adicional para debugging
+        console.error('❌ Erro detalhado:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
         throw error;
       }
       
+      // CRITICAL: Proteção contra erros desconhecidos
+      console.error('❌ Erro desconhecido na requisição:', error);
       throw new Error('An unexpected error occurred while making the request.');
     }
   }
@@ -114,7 +159,9 @@ class ApolloApiService {
 
     // Nome da empresa - usar q_organization_name
     if (filters.companyName && filters.companyName.trim()) {
-      body.q_organization_name = filters.companyName.trim();
+      // Normalizar o nome antes de enviar
+      const normalizedName = normalizeCompanyName(filters.companyName.trim());
+      body.q_organization_name = normalizedName;
     }
 
     // Localização - usar organization_locations como array
@@ -601,6 +648,17 @@ class ApolloApiService {
     console.log(`🏢 Organization ID: ${filters.organizationId}`);
 
     // CRITICAL: Validação inicial para evitar crashes
+    if (!filters || typeof filters !== 'object') {
+      console.error('❌ Filtros inválidos fornecidos');
+      return {
+        person: { id: 'invalid', name: 'Invalid Filters', title: 'N/A' } as any,
+        emails: [],
+        phone_numbers: [],
+        success: false,
+        message: '❌ Filtros inválidos fornecidos para busca de emails'
+      };
+    }
+
     if (!filters.personId || filters.personId.trim() === '') {
       console.error('❌ ID da pessoa é obrigatório');
       return {
@@ -832,6 +890,17 @@ class ApolloApiService {
     // CRITICAL: Validação inicial para evitar crashes
     if (!person || typeof person !== 'object') {
       console.error('❌ Dados da pessoa são inválidos para extração de emails');
+      return [];
+    }
+
+    // CRITICAL: Proteção adicional contra objetos nulos ou undefined
+    try {
+      if (person === null || person === undefined) {
+        console.error('❌ Pessoa é null ou undefined');
+        return [];
+      }
+    } catch (error) {
+      console.error('❌ Erro ao validar pessoa:', error);
       return [];
     }
     

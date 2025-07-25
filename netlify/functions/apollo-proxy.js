@@ -1,6 +1,11 @@
 const fetch = require('node-fetch');
 
 exports.handler = async (event, context) => {
+  console.log('🚀 Apollo proxy function called');
+  console.log('📋 Path:', event.path);
+  console.log('📋 Method:', event.httpMethod);
+  console.log('📋 Headers:', event.headers);
+  
   // Permitir CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -21,6 +26,7 @@ exports.handler = async (event, context) => {
     // Pegar a API key do header
     const apiKey = event.headers['x-api-key'];
     if (!apiKey) {
+      console.log('❌ API key não encontrada');
       return {
         statusCode: 401,
         headers,
@@ -28,28 +34,21 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Pegar o endpoint da query string ou do path
-    let endpoint = '';
+    // Pegar o endpoint do path
+    const path = event.path;
+    console.log('🔍 Path completo:', path);
     
-    // Primeiro tentar query string
-    if (event.queryStringParameters && event.queryStringParameters.endpoint) {
-      endpoint = event.queryStringParameters.endpoint;
-    } else {
-      // Fallback: pegar do path
-      const path = event.path.replace('/.netlify/functions/apollo-proxy', '');
-      endpoint = path || '';
+    // Remover o prefixo da function e adicionar /v1
+    let endpoint = path.replace('/.netlify/functions/apollo-proxy', '');
+    if (!endpoint.startsWith('/v1')) {
+      endpoint = '/v1' + endpoint;
     }
     
-    console.log('🔍 Endpoint extraído:', endpoint);
-    console.log('🔍 Path completo:', event.path);
-    console.log('🔍 Query params:', event.queryStringParameters);
+    console.log('🔍 Endpoint final:', endpoint);
     
     // Construir a URL da API Apollo
-    const apolloUrl = `https://api.apollo.io/v1${endpoint}`;
+    const apolloUrl = `https://api.apollo.io${endpoint}`;
     console.log('🌐 URL da API Apollo:', apolloUrl);
-    console.log('🔑 API Key presente:', !!apiKey);
-    console.log('📋 Method:', event.httpMethod);
-    console.log('📦 Body:', event.body);
     
     // Pegar o body da requisição
     let body = {};
@@ -59,7 +58,6 @@ exports.handler = async (event, context) => {
         console.log('📦 Body parseado:', body);
       } catch (error) {
         console.log('❌ Erro ao fazer parse do body:', error);
-        console.log('📦 Body original:', event.body);
       }
     }
 
@@ -76,7 +74,6 @@ exports.handler = async (event, context) => {
     });
 
     console.log('📥 Status da resposta Apollo:', response.status);
-    console.log('📥 Headers da resposta:', Object.fromEntries(response.headers.entries()));
 
     const data = await response.json();
     console.log('📥 Data da resposta Apollo:', data);
@@ -87,11 +84,14 @@ exports.handler = async (event, context) => {
       body: JSON.stringify(data),
     };
   } catch (error) {
-    console.error('Error in Apollo proxy:', error);
+    console.error('❌ Error in Apollo proxy:', error);
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Internal server error' }),
+      body: JSON.stringify({ 
+        error: 'Internal server error',
+        message: error.message
+      }),
     };
   }
 }; 

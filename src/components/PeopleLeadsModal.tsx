@@ -41,6 +41,9 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
   company,
   onEmailSearch
 }) => {
+  // CRITICAL: Log para debug do estado do modal
+  console.log(`🔍 PeopleLeadsModal - Renderizando com isOpen: ${isOpen}, people: ${people?.length || 0}`);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPeople, setSelectedPeople] = useState<Set<string>>(new Set());
   const [selectedIndustries, setSelectedIndustries] = useState<Set<string>>(new Set());
@@ -66,47 +69,91 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
     message: string;
   } | null>(null);
 
+  // CRITICAL: Estado para controlar se o modal está sendo processado
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // CRITICAL: Estado para controlar se deve renderizar a tabela
+  const [shouldRenderTable, setShouldRenderTable] = useState(true);
+
   // Função para mostrar notificação interna
-  const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
+  const showNotification = React.useCallback((type: 'success' | 'error' | 'info', message: string) => {
     setNotification({ type, message });
     
     // Auto-hide after 6 seconds
     setTimeout(() => {
       setNotification(null);
     }, 6000);
-  };
+  }, []);
 
   // Processar dados das pessoas para exibição
   const processedPeople: TablePerson[] = React.useMemo(() => {
+    // CRITICAL: Proteção contra arrays vazios
+    if (!people || people.length === 0) {
+      return [];
+    }
+
+    // CRITICAL: Se está processando, não recalcular para evitar re-renderizações
+    if (isProcessing) {
+      console.log('🔄 PeopleLeadsModal - Processando, evitando recálculo de processedPeople');
+      return people.map(person => {
+        const personId = person.id || `${person.name}-${Math.random()}`;
+        const updatedPerson = updatedPeople[personId];
+        return updatedPerson || {
+          ...person,
+          id: personId,
+          name: person.name || 'Nome não disponível',
+          title: person.title || person.headline || '',
+          email: person.email,
+          phone: person.phone_numbers?.[0]?.raw_number,
+          linkedin_url: person.linkedin_url,
+          city: person.city,
+          state: person.state,
+          country: person.country,
+          organization: person.organization || person.account
+        };
+      });
+    }
+
     return people.map(person => {
       const personId = person.id || `${person.name}-${Math.random()}`;
       
       // Se temos uma versão atualizada desta pessoa, usar ela
       const updatedPerson = updatedPeople[personId];
       if (updatedPerson) {
-        console.log(`📧 Usando pessoa atualizada: ${updatedPerson.name} - Email: ${updatedPerson.email}`);
+        // Log removido para evitar problemas de performance
         return updatedPerson;
       }
       
       // Caso contrário, usar dados originais
       return {
-      ...person,
-      id: personId,
-      name: person.name || 'Nome não disponível',
-      title: person.title || person.headline || '', // Garantir string
-      email: person.email,
-      phone: person.phone_numbers?.[0]?.raw_number,
-      linkedin_url: person.linkedin_url,
-      city: person.city,
-      state: person.state,
-      country: person.country,
-      organization: person.organization || person.account
+        ...person,
+        id: personId,
+        name: person.name || 'Nome não disponível',
+        title: person.title || person.headline || '', // Garantir string
+        email: person.email,
+        phone: person.phone_numbers?.[0]?.raw_number,
+        linkedin_url: person.linkedin_url,
+        city: person.city,
+        state: person.state,
+        country: person.country,
+        organization: person.organization || person.account
       };
     });
-  }, [people, updatedPeople]); // Add updatedPeople as dependency
+  }, [people, updatedPeople, isProcessing]); // Add isProcessing as dependency
 
   // Filtrar e ordenar pessoas
   const filteredAndSortedPeople = React.useMemo(() => {
+    // Proteção contra arrays vazios
+    if (!processedPeople || processedPeople.length === 0) {
+      return [];
+    }
+
+    // CRITICAL: Se está processando, usar cache para evitar recálculos
+    if (isProcessing) {
+      console.log('🔄 PeopleLeadsModal - Processando, usando cache para filteredAndSortedPeople');
+      return processedPeople;
+    }
+
     let filtered = processedPeople.filter(person => {
       const matchesSearch = person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           (person.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -145,9 +192,9 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
     });
 
     return sorted;
-  }, [processedPeople, searchTerm, filterBy, selectedIndustries, sortBy]);
+  }, [processedPeople, searchTerm, filterBy, selectedIndustries, sortBy, isProcessing]); // Add isProcessing as dependency
 
-  const handleEmailSearch = async (person: TablePerson) => {
+  const handleEmailSearch = React.useCallback(async (person: TablePerson) => {
     if (!onEmailSearch) {
       showNotification('error', 'Funcionalidade de busca de email não está disponível');
       return;
@@ -156,6 +203,9 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
     console.log(`🔍 PeopleLeadsModal - handleEmailSearch para: ${person.name} (ID: ${person.id})`);
     console.log(`🏢 Organization ID: ${person.organization?.id || person.account?.id || company.id}`);
 
+    // CRITICAL: Marcar como processando e pausar renderização da tabela
+    setIsProcessing(true);
+    setShouldRenderTable(false);
     setEmailSearchLoading(person.id);
     
     try {
@@ -172,11 +222,6 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
       
       console.log('✅ PeopleLeadsModal - Resultado da busca de email:', result);
       
-      setEmailSearchResults(prev => ({
-        ...prev,
-        [person.id]: result
-      }));
-      
       // CRITICAL: Atualizar a pessoa na tabela com os emails encontrados
       if (result.success && result.emails && result.emails.length > 0) {
         const primaryEmail = result.emails[0].email;
@@ -190,23 +235,19 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
           phone: person.phone || (result.phone_numbers && result.phone_numbers.length > 0 ? result.phone_numbers[0].raw_number : undefined)
         };
         
-        // Atualizar o estado das pessoas atualizadas
+        // Atualizar o estado das pessoas atualizadas de forma mais segura
         setUpdatedPeople(prev => ({
           ...prev,
           [person.id]: updatedPersonData
         }));
         
-        console.log(`✅ Email atualizado na tabela para ${person.name}: ${primaryEmail}`);
-        
-        // Force re-render by updating the key
+        // Atualizar resultados de busca de email
         setEmailSearchResults(prev => ({
           ...prev,
           [person.id]: { ...result, emailUpdated: true }
         }));
-      }
-      
-      // Show success/failure notification without using alert
-      if (result.success && result.emails && result.emails.length > 0) {
+        
+        // Show success notification
         const emailList = result.emails.map((e: any) => e.email).join(', ');
         showNotification('success', `✅ Email atualizado! ${person.name}: ${emailList.substring(0, 60)}${emailList.length > 60 ? '...' : ''}`);
       } else if (result.success && result.phone_numbers && result.phone_numbers.length > 0) {
@@ -221,8 +262,14 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
       showNotification('error', `❌ Erro na busca para ${person.name}: ${errorMessage.substring(0, 80)}${errorMessage.length > 80 ? '...' : ''}`);
     } finally {
       setEmailSearchLoading(null);
+      // CRITICAL: Desmarcar como processando e reativar renderização da tabela
+      setIsProcessing(false);
+      // Pequeno delay para garantir que as atualizações de estado sejam processadas
+      setTimeout(() => {
+        setShouldRenderTable(true);
+      }, 100);
     }
-  };
+  }, [onEmailSearch, showNotification, company.id]);
 
   const handleBatchEmailCapture = async () => {
     const selectedPersonsData = filteredAndSortedPeople.filter(p => selectedPeople.has(p.id));
@@ -269,6 +316,7 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
               email: primaryEmail
             };
             
+            // Atualizar pessoas com emails encontrados
             setUpdatedPeople(prev => ({
               ...prev,
               [person.id]: updatedPersonData
@@ -417,14 +465,22 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
   };
 
   useEffect(() => {
-    setSearchTerm('');
-    setSelectedIndustries(new Set());
-    setSortBy('name');
-    setFilterBy('all');
-    setSelectedPeople(new Set());
-  }, [people, isOpen]);
+    // CRITICAL: Só resetar os filtros quando o modal abrir, não quando people mudar
+    if (isOpen && !isProcessing) {
+      console.log(`🔄 PeopleLeadsModal - Resetando filtros para modal aberto`);
+      setSearchTerm('');
+      setSelectedIndustries(new Set());
+      setSortBy('name');
+      setFilterBy('all');
+      setSelectedPeople(new Set());
+    }
+  }, [isOpen, isProcessing]); // Add isProcessing as dependency to avoid resets during processing
 
-  if (!isOpen) return null;
+  // CRITICAL: Proteção adicional para evitar renderização quando modal está fechado
+  if (!isOpen) {
+    console.log(`🚫 PeopleLeadsModal - Modal fechado, não renderizando`);
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -657,7 +713,7 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredAndSortedPeople.map((person) => (
+              {shouldRenderTable && filteredAndSortedPeople.map((person) => (
                 <tr key={person.id} className="hover:bg-gray-50">
                   <td className="px-4 py-4">
                     <input
@@ -712,6 +768,8 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
                         const wasEmailFound = emailSearchResults[person.id]?.success && 
                                             emailSearchResults[person.id]?.emails?.length > 0;
                         
+                        // Log removido para evitar problemas de performance
+                        
                         if (hasValidEmail) {
                           return (
                             <div className="flex items-center text-sm">
@@ -747,14 +805,15 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
                   <td className="px-4 py-4">
                     <div className="flex items-center text-sm text-gray-900">
                       <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                      {[person.city, person.state, person.country].filter(Boolean).join(', ') || 'Não especificado'}
+                      <span>
+                        {[person.city, person.state, person.country].filter(Boolean).join(', ') || 'Não especificado'}
+                      </span>
                     </div>
                   </td>
 
                   {/* Ações */}
                   <td className="px-4 py-4">
                     <div className="flex items-center space-x-2">
-                      {/* Botão de email/LinkedIn já existente */}
                       {(() => {
                         const hasValidEmail = person.email && 
                                             person.email.includes('@') && 
@@ -762,6 +821,9 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
                                             !person.email.includes('domain.com');
                         const wasEmailFound = emailSearchResults[person.id]?.success && 
                                             emailSearchResults[person.id]?.emails?.length > 0;
+                        
+                        // Log removido para evitar problemas de performance
+                        
                         if (!hasValidEmail) {
                           return (
                             <button
@@ -810,6 +872,16 @@ export const PeopleLeadsModal: React.FC<PeopleLeadsModalProps> = ({
                   </td>
                 </tr>
               ))}
+              {!shouldRenderTable && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center">
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mr-3"></div>
+                      <span className="text-gray-600">Processando busca de email...</span>
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
 

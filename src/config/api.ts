@@ -2,30 +2,23 @@
 export const API_CONFIG = {
   // Em desenvolvimento, usar proxy local do Vite
   development: {
-    baseUrl: '/api/apollo/v1',
+    baseUrl: '/api/apollo',
     useProxy: true,
   },
-  // Em produção, tentar diferentes estratégias
+  // Em produção, usar Netlify Functions
   production: {
-    // Estratégia 1: Proxy público (fallback)
-    proxyUrl: 'https://api.allorigins.win/raw?url=https://api.apollo.io/v1',
-    // Estratégia 2: URL direta (pode falhar por CORS)
-    directUrl: 'https://api.apollo.io/v1',
+    baseUrl: '/api/apollo',
     useProxy: true,
   }
 };
 
 // Função para obter a URL base da API
 export function getApiBaseUrl(): string {
-  if (import.meta.env.DEV) {
-    return API_CONFIG.development.baseUrl;
-  }
-  
-  // Em produção, tentar URL direta primeiro (pode falhar por CORS)
-  return API_CONFIG.production.directUrl;
+  // Usar sempre o proxy (Vite em dev, Netlify Functions em prod)
+  return API_CONFIG.development.baseUrl;
 }
 
 // Função para verificar se deve usar proxy
 export function shouldUseProxy(): boolean {
-  return import.meta.env.DEV || API_CONFIG.production.useProxy;
+  return true; // Sempre usar proxy
 } 

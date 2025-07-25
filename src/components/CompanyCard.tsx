@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, MapPin, Users, Calendar, DollarSign, Search } from 'lucide-react';
+import { ExternalLink, MapPin, Users, Calendar, DollarSign, Search, Loader2 } from 'lucide-react';
 import type { Company, PeopleSearchFilters } from '../types/apollo';
 import axios from 'axios';
 import { useState } from 'react';
@@ -362,8 +362,45 @@ export const CompanyCard: React.FC<CompanyCardProps> = ({ company, onSearchPeopl
     }
   }
 
+  // Estado para controlar o loading do botão "Busca Rápida"
+  const [isQuickSearchLoading, setIsQuickSearchLoading] = useState(false);
+
+  // Função para executar a busca rápida com loading
+  const handleQuickSearch = async () => {
+    if (!onQuickPeopleSearch) {
+      console.log('❌ onQuickPeopleSearch não está disponível');
+      return;
+    }
+
+    setIsQuickSearchLoading(true);
+    console.log('🚀 Busca Rápida clicada para:', company.name);
+    console.log('🏢 Company data:', { id: company.id, organization_id: company.organization_id });
+    
+    try {
+      const quickFilters: PeopleSearchFilters = {
+        organizationId: company.organization_id || company.id,
+        personTitles: [], // Remove title restrictions
+        personSeniorities: [], // Remove seniority restrictions
+        personLocations: [],
+        keywords: '',
+        page: 1,
+        perPage: 100, // Aumentar para 100 resultados
+      };
+      console.log('📋 Filtros da busca rápida:', quickFilters);
+      console.log('✅ Executando onQuickPeopleSearch...');
+      
+      await onQuickPeopleSearch(company, quickFilters);
+    } catch (error) {
+      console.error('❌ Erro na busca rápida:', error);
+    } finally {
+      setIsQuickSearchLoading(false);
+    }
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 p-6 border border-gray-100 hover:border-blue-200 h-full flex flex-col">
+    <div className={`bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 p-6 border border-gray-100 hover:border-blue-200 h-full flex flex-col ${
+      isQuickSearchLoading ? 'animate-pulse' : ''
+    }`}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center">
           {company.logo_url && (
@@ -463,32 +500,37 @@ export const CompanyCard: React.FC<CompanyCardProps> = ({ company, onSearchPeopl
       {/* Botões de busca centralizados, acima do ID/LinkedIn */}
       <div className="flex items-center justify-center w-full mt-4 mb-2">
         {onSearchPeople && (
-          <button
-            onClick={() => {
-              console.log('🚀 Busca Rápida clicada para:', company.name);
-              console.log('🏢 Company data:', { id: company.id, organization_id: company.organization_id });
-              const quickFilters: PeopleSearchFilters = {
-                organizationId: company.organization_id || company.id,
-                personTitles: [], // Remove title restrictions
-                personSeniorities: [], // Remove seniority restrictions
-                personLocations: [],
-                keywords: '',
-                page: 1,
-                perPage: 100, // Aumentar para 100 resultados
-              };
-              console.log('📋 Filtros da busca rápida:', quickFilters);
-              if (onQuickPeopleSearch) {
-                console.log('✅ Executando onQuickPeopleSearch...');
-                onQuickPeopleSearch(company, quickFilters);
-              } else {
-                console.log('❌ onQuickPeopleSearch não está disponível');
-              }
-            }}
-            className="flex items-center px-3 py-1.5 text-xs bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors shadow-sm font-medium whitespace-nowrap"
-          >
-            <Search className="w-3 h-3 mr-1" />
-            Busca Rápida
-          </button>
+          <div className="relative">
+            <button
+              onClick={handleQuickSearch}
+              disabled={isQuickSearchLoading}
+              className={`flex items-center px-3 py-1.5 text-xs rounded-md transition-all duration-200 shadow-sm font-medium whitespace-nowrap relative overflow-hidden ${
+                isQuickSearchLoading 
+                  ? 'bg-gray-400 text-white cursor-not-allowed' 
+                  : 'bg-emerald-500 text-white hover:bg-emerald-600 hover:shadow-md'
+              }`}
+            >
+              {isQuickSearchLoading && (
+                <div className="absolute inset-0 bg-emerald-600 animate-pulse opacity-20"></div>
+              )}
+              {isQuickSearchLoading ? (
+                <>
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin relative z-10" />
+                  <span className="relative z-10">Buscando...</span>
+                </>
+              ) : (
+                <>
+                  <Search className="w-3 h-3 mr-1" />
+                  Busca Rápida
+                </>
+              )}
+            </button>
+            {isQuickSearchLoading && (
+              <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-emerald-200 rounded-full overflow-hidden">
+                <div className="h-full bg-emerald-500 animate-pulse" style={{ width: '100%' }}></div>
+              </div>
+            )}
+          </div>
         )}
       </div>
 

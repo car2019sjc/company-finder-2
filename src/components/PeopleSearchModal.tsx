@@ -175,8 +175,12 @@ export const PeopleSearchModal: React.FC<PeopleSearchModalProps> = ({
     }
   }, [isOpen, company.id, company.organization_id]);
 
+  if (!isOpen) {
+    return null;
+  }
+
   return (
-    <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${!isOpen ? 'hidden' : ''}`}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
@@ -408,11 +412,16 @@ export const PeopleSearchModal: React.FC<PeopleSearchModalProps> = ({
               className="px-6 py-2 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-md hover:from-blue-700 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed transition-all flex items-center shadow-lg"
             >
               {isLoading ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                  Buscando...
+                </>
               ) : (
-                <Search className="w-4 h-4 mr-2" />
+                <>
+                  <Search className="w-4 h-4 mr-2" />
+                  🔍 Buscar em {company.name}
+                </>
               )}
-              {isLoading ? 'Buscando...' : `🔍 Buscar em ${company.name}`}
             </button>
           </div>
         </form>

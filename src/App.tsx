@@ -19,7 +19,8 @@ import type { SearchFilters, Company, PeopleSearchFilters, Person as PersonType 
 
 function App() {
   // State management
-  const [apiKey] = useLocalStorage<string>('apollo-api-key', '');
+  // Carregar API key das variáveis de ambiente do Vite
+  const apiKey = import.meta.env.VITE_APOLLO_API_KEY || '';
   const [companies, setCompanies] = useState<Company[]>([]);
   const [people, setPeople] = useState<PersonType[]>([]);
   const [savedPeople, setSavedPeople] = useState<PersonType[]>([]);
@@ -59,7 +60,12 @@ function App() {
   React.useEffect(() => {
     // A API key agora é carregada automaticamente das variáveis de ambiente
     // no construtor do apolloApiService
-  }, []);
+    console.log('🔍 App.tsx - API Key carregada:', {
+      hasApiKey: !!apiKey,
+      apiKeyLength: apiKey?.length,
+      apiKeyPreview: apiKey ? `${apiKey.substring(0, 10)}...` : 'undefined'
+    });
+  }, [apiKey]);
 
   // Update exportPageTo when totalPages changes
   React.useEffect(() => {
@@ -79,7 +85,6 @@ function App() {
     setCurrentFilters(filters);
 
     try {
-      apolloApiService.setApiKey(apiKey);
       const response = await apolloApiService.searchCompanies(filters);
       
       // Use setTimeout to ensure state updates are batched properly
@@ -118,7 +123,6 @@ function App() {
     setError(null);
 
     try {
-      apolloApiService.setApiKey(apiKey);
       const response = await apolloApiService.searchPeople(filters);
       
       const foundPeople = response.contacts || response.people || [];
@@ -145,7 +149,6 @@ function App() {
     setSelectedCompany(company);
 
     try {
-      apolloApiService.setApiKey(apiKey);
       const response = await apolloApiService.searchPeople(filters);
       
       const foundPeople = response.contacts || response.people || [];
@@ -166,6 +169,21 @@ function App() {
   };
 
   const handleEmailSearch = async (personId: string, organizationId?: string) => {
+    // CRITICAL: Log para debug do estado do modal
+    console.log(`🔍 App.tsx - handleEmailSearch iniciado - Modal aberto: ${isPeopleLeadsModalOpen}, selectedCompany: ${selectedCompany?.name}`);
+    
+    // CRITICAL: Validação inicial para evitar crashes
+    if (!personId || personId.trim() === '') {
+      console.error('❌ ID da pessoa é inválido');
+      return {
+        person: { id: 'invalid', name: 'Invalid ID', title: 'N/A' } as any,
+        emails: [],
+        phone_numbers: [],
+        success: false,
+        message: '❌ ID da pessoa é inválido'
+      };
+    }
+
     if (!apiKey) {
       console.error('❌ API key é obrigatória para busca de email');
       return {
@@ -181,7 +199,10 @@ function App() {
     console.log(`🏢 Organization ID: ${organizationId}`);
 
     try {
-      apolloApiService.setApiKey(apiKey);
+      // CRITICAL: Validar se o serviço está disponível
+      if (!apolloApiService) {
+        throw new Error('Apollo API Service não está disponível');
+      }
       
       // Add timeout and error handling to prevent app crash
       const response = await Promise.race([
@@ -195,6 +216,9 @@ function App() {
       ]);
       
       console.log('✅ App.tsx - Resposta da busca de email:', response);
+      
+      // CRITICAL: Verificar se o modal ainda está aberto após a busca
+      console.log(`🔍 App.tsx - Após busca - Modal ainda aberto: ${isPeopleLeadsModalOpen}, selectedCompany: ${selectedCompany?.name}`);
       
       // Show success notification if emails found
       if (response.success && response.emails && response.emails.length > 0) {
@@ -210,10 +234,24 @@ function App() {
     } catch (err) {
       console.error('❌ App.tsx - Erro na busca de email:', err);
       
+      // CRITICAL: Log detalhado do erro para debugging
+      if (err instanceof Error) {
+        console.error('❌ Detalhes do erro:', {
+          message: err.message,
+          stack: err.stack,
+          name: err.name
+        });
+      }
+      
       // Return safe response instead of throwing to prevent app crash
       const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido na busca de email';
       
-      showGlobalNotification('error', `❌ Erro na busca: ${errorMessage.substring(0, 100)}${errorMessage.length > 100 ? '...' : ''}`);
+      // CRITICAL: Proteção contra notificação que pode falhar
+      try {
+        showGlobalNotification('error', `❌ Erro na busca: ${errorMessage.substring(0, 100)}${errorMessage.length > 100 ? '...' : ''}`);
+      } catch (notificationError) {
+        console.error('❌ Erro ao mostrar notificação:', notificationError);
+      }
       
       return {
         person: { id: personId, name: 'Erro na busca', title: 'N/A' } as any,
@@ -297,6 +335,11 @@ function App() {
   // Filter and sort companies
   const filteredAndSortedCompanies = React.useMemo(() => {
     let filtered = companies;
+
+    // Apply website URL filter - only show companies with website
+    filtered = filtered.filter(company => {
+      return company.website_url && company.website_url.trim() !== '';
+    });
 
     // Apply industry filter
     if (selectedIndustries.length > 0) {
@@ -645,6 +688,22 @@ function App() {
                   Showing {filteredAndSortedCompanies.length} of {companies.length} companies
                 </div>
               </div>
+              
+              {/* Website filter notification */}
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-blue-800">
+                      <strong>Filtro ativo:</strong> Mostrando apenas empresas com URL de site disponível
+                    </p>
+                  </div>
+                </div>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredAndSortedCompanies.map((company) => (
@@ -691,23 +750,30 @@ function App() {
         {/* Modals */}
 
         {selectedCompany && (
-          <PeopleSearchModal
-            isOpen={isPeopleSearchModalOpen}
-            onClose={() => setIsPeopleSearchModalOpen(false)}
-            onSearch={handlePeopleSearch}
-            company={selectedCompany}
-            isLoading={isPeopleLoading}
-          />
+          <ErrorBoundary>
+            <PeopleSearchModal
+              isOpen={isPeopleSearchModalOpen}
+              onClose={() => setIsPeopleSearchModalOpen(false)}
+              onSearch={handlePeopleSearch}
+              company={selectedCompany}
+              isLoading={isPeopleLoading}
+            />
+          </ErrorBoundary>
         )}
 
         {selectedCompany && (
-          <PeopleLeadsModal
-            isOpen={isPeopleLeadsModalOpen}
-            onClose={() => setIsPeopleLeadsModalOpen(false)}
-            people={people}
-            company={selectedCompany}
-            onEmailSearch={handleEmailSearch}
-          />
+          <ErrorBoundary>
+            <PeopleLeadsModal
+              isOpen={isPeopleLeadsModalOpen}
+              onClose={() => {
+                console.log('🔒 PeopleLeadsModal - Fechando modal manualmente');
+                setIsPeopleLeadsModalOpen(false);
+              }}
+              people={people}
+              company={selectedCompany}
+              onEmailSearch={handleEmailSearch}
+            />
+          </ErrorBoundary>
         )}
 
         {/* Modal de exportação paginada */}
