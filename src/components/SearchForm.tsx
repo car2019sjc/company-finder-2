@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, MapPin, Users, Settings, Building } from 'lucide-react';
 import type { SearchFilters } from '../types/apollo';
+import { IndustrySelector } from './IndustrySelector';
 
 interface SearchFormProps {
   onSearch: (filters: SearchFilters) => void;
@@ -23,6 +24,8 @@ export const SearchForm: React.FC<SearchFormProps> = ({
     page: 1,
     perPage: 25,
   });
+
+  const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
 
   const employeeRanges = [
     { value: 'all', label: 'All sizes' },
@@ -53,14 +56,14 @@ export const SearchForm: React.FC<SearchFormProps> = ({
     if (!filters.companyName.trim() && 
         !filters.location.trim() && 
         filters.employeeRange === 'all' &&
-        !filters.businessArea.trim()) {
+        selectedIndustries.length === 0) {
       alert('Por favor, adicione pelo menos um critério de busca. Para melhores resultados, recomendamos usar LOCALIZAÇÃO e/ou ÁREA DE NEGÓCIO.');
       return;
     }
     
-    if (filters.businessArea.trim() && !filters.location.trim()) {
+    if (selectedIndustries.length > 0 && !filters.location.trim()) {
       const confirmSearch = confirm(
-        `Você está buscando por "${filters.businessArea}" sem especificar localização. ` +
+        `Você está buscando por setores específicos sem especificar localização. ` +
         'Isso pode retornar muitos resultados irrelevantes. ' +
         'Deseja adicionar uma localização específica para melhores resultados?'
       );
@@ -69,8 +72,15 @@ export const SearchForm: React.FC<SearchFormProps> = ({
       }
     }
     
-    console.log('🚀 Iniciando busca com filtros:', filters);
-    onSearch({ ...filters, page: 1 });
+    // Converter setores selecionados para string separada por vírgula
+    const searchFilters = {
+      ...filters,
+      businessArea: selectedIndustries.join(','),
+      page: 1
+    };
+    
+    console.log('🚀 Iniciando busca com filtros:', searchFilters);
+    onSearch(searchFilters);
   };
 
   const handleInputChange = (field: keyof SearchFilters, value: string) => {
@@ -94,6 +104,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
       page: 1,
       perPage: 25,
     });
+    setSelectedIndustries([]);
     if (onNewSearch) {
       onNewSearch();
     }
@@ -153,36 +164,11 @@ export const SearchForm: React.FC<SearchFormProps> = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Business Area / Industry (Recomendado) 🎯
-          </label>
-          <div className="relative">
-            <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              value={filters.businessArea}
-              onChange={(e) => handleInputChange('businessArea', e.target.value)}
-              placeholder="ex: Agronegócio, Tecnologia, Saúde, Finanças"
-              className="w-full pl-10 pr-4 py-2 border-2 border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-green-50"
-            />
-          </div>
-          {filters.businessArea.length === 0 && (
-            <div className="mt-2">
-              <p className="text-xs text-green-600 mb-1 font-medium">🏭 Setores populares no Brasil:</p>
-              <div className="flex flex-wrap gap-1">
-                {businessAreaSuggestions.slice(0, 12).map(area => (
-                  <button
-                    key={area}
-                    type="button"
-                    onClick={() => handleBusinessAreaSuggestion(area)}
-                    className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors border border-green-300"
-                  >
-                    {area}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          <IndustrySelector
+            selectedIndustries={selectedIndustries}
+            onIndustryChange={setSelectedIndustries}
+            placeholder="Selecione setores de interesse..."
+          />
         </div>
       </div>
 
@@ -229,7 +215,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
           <div className="text-xs text-blue-700 mt-1 space-y-1">
             {filters.companyName && <p>• Empresa: <span className="font-medium">{filters.companyName}</span></p>}
             {filters.location && <p>• 📍 Localização: <span className="font-medium">{filters.location}</span></p>}
-            {filters.businessArea && <p>• �� Área de Negócio: <span className="font-medium">{filters.businessArea}</span></p>}
+            {selectedIndustries.length > 0 && <p>• 🏭 Setores: <span className="font-medium">{selectedIndustries.length} selecionado(s)</span></p>}
             {filters.employeeRange !== 'all' && (
               <p>• 👥 Funcionários: <span className="font-medium">
                 {employeeRanges.find(r => r.value === filters.employeeRange)?.label}

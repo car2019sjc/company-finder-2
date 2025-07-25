@@ -181,125 +181,51 @@ class ApolloApiService {
 
     // Área de negócio - usar q_organization_keyword_tags
     if (filters.businessArea && filters.businessArea.trim()) {
-      // Mapa de tradução mais específico baseado na documentação Apollo
-      const businessAreaMap: { [key: string]: string } = {
-        // Tecnologia
-        'Tecnologia': 'technology',
-        'Tecnologia e TI': 'technology',
-        'TI': 'information technology',
-        'Software': 'computer software',
-        'Desenvolvimento': 'software development',
-        
-        // Saúde
-        'Saúde': 'healthcare',
-        'Medicina': 'medical practice',
-        'Hospital': 'hospital health care',
-        'Clínica': 'medical practice',
-        'Farmácia': 'pharmaceuticals',
-        
-        // Finanças
-        'Finanças': 'financial services',
-        'Financeiro': 'financial services',
-        'Banco': 'banking',
-        'Bancário': 'banking',
-        'Seguro': 'insurance',
-        'Investimento': 'investment management',
-        
-        // Educação
-        'Educação': 'education management',
-        'Ensino': 'education management',
-        'Escola': 'primary secondary education',
-        'Universidade': 'higher education',
-        
-        // Varejo
-        'Varejo': 'retail',
-        'Comércio': 'retail',
-        'E-commerce': 'internet',
-        'Loja': 'retail',
-        
-        // Indústria
-        'Indústria': 'manufacturing',
-        'Manufatura': 'manufacturing',
-        'Industrial': 'industrial automation',
-        'Fábrica': 'manufacturing',
-        
-        // Consultoria
-        'Consultoria': 'management consulting',
-        'Consultoria Empresarial': 'management consulting',
-        
-        // Construção e Imobiliário
-        'Construção': 'construction',
-        'Imobiliário': 'real estate',
-        'Arquitetura': 'architecture planning',
-        'Engenharia': 'civil engineering',
-        
-        // Mídia e Comunicação
-        'Mídia': 'media production',
-        'Marketing': 'marketing advertising',
-        'Publicidade': 'marketing advertising',
-        'Comunicação': 'public relations communications',
-        
-        // Transporte e Logística
-        'Logística': 'logistics supply chain',
-        'Transporte': 'transportation trucking railroad',
-        'Frete': 'logistics supply chain',
-        
-        // Energia
-        'Energia': 'utilities',
-        'Petróleo': 'oil energy',
-        'Gás': 'oil energy',
-        'Energia Solar': 'renewables environment',
-        
-        // Agronegócio
-        'Agronegócio': 'farming',
-        'Agricultura': 'farming',
-        'Pecuária': 'farming',
-        'Rural': 'farming',
-        
-        // Turismo
-        'Turismo': 'leisure travel tourism',
-        'Hotel': 'hospitality',
-        'Hotelaria': 'hospitality',
-        'Hospitalidade': 'hospitality',
-        
-        // Automotivo
-        'Automotivo': 'automotive',
-        'Automobilístico': 'automotive',
-        'Automóveis': 'automotive',
-        
-        // Farmacêutico
-        'Farmacêutico': 'pharmaceuticals',
-        
-        // Entretenimento
-        'Entretenimento': 'entertainment',
-        'Cultura': 'museums institutions',
-        
-        // Telecomunicações
-        'Telecomunicações': 'telecommunications',
-        'Telecom': 'telecommunications',
-        
-        // Mineração
-        'Mineração': 'mining metals',
-        
-        // Química
-        'Química': 'chemicals',
-        
-        // Têxtil
-        'Têxtil': 'textiles',
-        
-        // Alimentação
-        'Alimentação': 'food beverages',
-        'Alimentos': 'food production',
-        'Bebidas': 'food beverages',
-        'Restaurante': 'restaurants'
-      };
+      // Se businessArea contém vírgulas, é uma lista de setores do IndustrySelector
+      const businessAreas = filters.businessArea.split(',').map(area => area.trim()).filter(area => area);
       
-      const translatedBusinessArea = businessAreaMap[filters.businessArea] || 
-                                   businessAreaMap[filters.businessArea.toLowerCase()] || 
-                                   filters.businessArea.toLowerCase();
-      
-      console.log(`🔄 Traduzindo "${filters.businessArea}" para "${translatedBusinessArea}"`);
-      body.q_organization_keyword_tags = [translatedBusinessArea];
+      if (businessAreas.length > 0) {
+        console.log(`🔄 Processando ${businessAreas.length} setores:`, businessAreas);
+        
+        // Os setores já vêm no formato correto do Apollo.io do IndustrySelector
+        // Mas mantemos o mapa para compatibilidade com busca manual
+        const businessAreaMap: { [key: string]: string } = {
+          // Mapeamento para compatibilidade com termos em português
+          'Tecnologia': 'computer-software',
+          'Saúde': 'healthcare',
+          'Finanças': 'financial-services',
+          'Agronegócio': 'farming',
+          'Educação': 'education-management',
+          'Varejo': 'retail',
+          'Indústria': 'manufacturing',
+          'Consultoria': 'management-consulting',
+          'Construção': 'construction',
+          'Mídia': 'marketing-advertising',
+          'Logística': 'logistics-supply-chain',
+          'Energia': 'oil-energy',
+          'Turismo': 'hospitality',
+          'Automotivo': 'automotive',
+          'Farmacêutico': 'pharmaceuticals',
+          'Entretenimento': 'entertainment',
+          'Telecomunicações': 'telecommunications',
+          'Mineração': 'mining-metals',
+          'Química': 'chemicals',
+          'Têxtil': 'textiles',
+          'Alimentação': 'food-beverages'
+        };
+        
+        const translatedAreas = businessAreas.map(area => {
+          // Se já está no formato do Apollo (com hífens), usar diretamente
+          if (area.includes('-')) {
+            return area;
+          }
+          // Senão, tentar traduzir
+          return businessAreaMap[area] || area.toLowerCase().replace(/\s+/g, '-');
+        });
+        
+        console.log(`🔄 Setores traduzidos:`, translatedAreas);
+        body.q_organization_keyword_tags = translatedAreas;
+      }
     }
 
     // Faixa de funcionários - usar organization_num_employees_ranges
