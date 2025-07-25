@@ -1,81 +1,96 @@
-# Apollo.io Company Search Application
+# Lead Company Finder
 
-A React application for searching companies using the Apollo.io API.
+Uma aplicação React para buscar empresas e seus funcionários usando a API do Apollo.io.
 
-## Setup Instructions
+## Funcionalidades
 
-### 1. Environment Variables Configuration
+- ✅ Busca de empresas por nome, localização, setor e tamanho
+- ✅ Filtro automático para mostrar apenas empresas com URL de site
+- ✅ Busca de funcionários por empresa
+- ✅ Exportação de dados em CSV
+- ✅ Interface responsiva e intuitiva
 
-1. Create a `.env` file in the root directory
-2. Add your API keys to the `.env` file:
+## Deploy
 
-```env
-# Apollo.io API Configuration
-VITE_APOLLO_API_KEY=your_apollo_api_key_here
+### GitHub Pages (Automático)
 
-# OpenAI API Configuration (for email capture features)
-VITE_OPENAI_API_KEY=your_openai_api_key_here
-```
+O deploy é feito automaticamente via GitHub Actions quando você faz push para a branch `main`.
 
-### 2. Getting Your API Keys
+### Configuração necessária:
 
-**Apollo.io API Key:**
-1. Sign up for an Apollo.io account with a paid plan (API access requires a paid plan)
-2. Go to your Apollo.io account settings → Integrations → API
-3. Copy your API key
-4. Add it to the `.env` file
+1. **Secrets do GitHub**: Configure as seguintes variáveis no repositório:
+   - `VITE_APOLLO_API_KEY`: Sua chave da API do Apollo.io
 
-**OpenAI API Key (optional):**
-1. Sign up at [OpenAI](https://platform.openai.com)
-2. Go to API Keys section
-3. Create a new API key
-4. Add it to the `.env` file
+2. **GitHub Pages**: 
+   - Vá em Settings > Pages
+   - Source: Deploy from a branch
+   - Branch: gh-pages / (root)
 
-### 3. Running the Application
+### Deploy manual local:
 
 ```bash
+# Instalar dependências
 npm install
+
+# Build para produção
+npm run build
+
+# Preview local do build
+npm run preview
+```
+
+## Desenvolvimento
+
+```bash
+# Instalar dependências
+npm install
+
+# Executar em modo desenvolvimento
 npm run dev
 ```
 
-The application uses Vite's proxy configuration to handle CORS issues with the Apollo.io API.
+## Variáveis de Ambiente
 
-## Features
+Crie um arquivo `.env` na raiz do projeto:
 
-- Search companies by name, location, and employee count
-- View detailed company information including:
-  - Company logo and basic info
-  - Location and employee count
-  - Founded year and revenue
-  - Industry and keywords
-  - Social media links
-- Pagination support for large result sets
-- Responsive design for mobile and desktop
-- Email capture from company websites
-- People search within companies
-- Export functionality for leads and companies
+```env
+VITE_APOLLO_API_KEY=sua_chave_apollo_aqui
+```
 
-## Technical Details
+## Tecnologias
 
-- Built with React, TypeScript, and Tailwind CSS
-- Uses Vite proxy to handle CORS issues with Apollo.io API
-- Implements proper error handling and loading states
-- API keys are configured via environment variables for security
-- No manual API key input required in the browser
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- Apollo.io API
+- Lucide React (ícones)
 
-## Troubleshooting
+## Estrutura do Projeto
 
-If you encounter CORS errors:
-1. Make sure you're running the development server (`npm run dev`)
-2. The Vite proxy should handle CORS automatically
-3. Check that your Apollo.io API key is valid and has the necessary permissions
+```
+src/
+├── components/          # Componentes React
+├── services/           # Serviços de API
+├── types/              # Tipos TypeScript
+├── config/             # Configurações
+└── hooks/              # Hooks customizados
+```
 
-If you get authentication errors:
-1. Verify your Apollo.io API key is correct in the `.env` file
-2. Ensure your Apollo.io account has a paid plan (free plans don't include API access)
-3. Check that your API key has the necessary permissions in your Apollo.io account settings
+## Filtros Implementados
 
-If the application doesn't work:
-1. Make sure the `.env` file exists in the root directory
-2. Verify that the API keys are properly formatted in the `.env` file
-3. Restart the development server after making changes to the `.env` file
+- **Filtro de Site**: Mostra apenas empresas que possuem URL de site
+- **Filtro por Setor**: Filtra empresas por área de negócio
+- **Filtro por Localização**: Busca por cidade/estado/país
+- **Filtro por Tamanho**: Filtra por número de funcionários
+
+## API
+
+A aplicação utiliza a API do Apollo.io para:
+- Buscar empresas
+- Buscar funcionários
+- Obter informações de contato
+
+## Licença
+
+MIT
