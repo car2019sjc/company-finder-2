@@ -1,1 +1,3 @@
-/*    /index.html   200 
+/api/test /.netlify/functions/test-api 200
+/api/apollo/* /.netlify/functions/apollo-proxy/:splat 200
+/* /index.html 200
