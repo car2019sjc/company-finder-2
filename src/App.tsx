@@ -617,90 +617,73 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        <header className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-20 mb-8 rounded-3xl shadow-2xl border border-slate-700/50">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-500/20 to-orange-500/20"></div>
-            <div className="absolute top-10 left-10 w-32 h-32 bg-blue-500/10 rounded-full blur-xl"></div>
-            <div className="absolute bottom-10 right-10 w-40 h-40 bg-orange-500/10 rounded-full blur-xl"></div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-500/5 rounded-full blur-2xl"></div>
+        <header className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-4 mb-6 rounded-xl shadow-lg border border-slate-700/50">
+          {/* Background Pattern - Reduzido */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-500/10 to-orange-500/10"></div>
           </div>
 
-          <div className="relative max-w-5xl mx-auto text-center px-8">
-            {/* Logo OnSet com animação */}
-            <div className="mb-8 transform hover:scale-105 transition-transform duration-300">
-              <h1 className="text-7xl font-black mb-3 tracking-tight">
-                <span className="bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent drop-shadow-lg">On</span>
-                <span className="bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent drop-shadow-lg">Set</span>
+          <div className="relative max-w-4xl mx-auto text-center px-4">
+            {/* Logo OnSet compacto */}
+            <div className="flex items-center justify-center mb-2">
+              <h1 className="text-2xl font-bold mr-4">
+                <span className="bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent">On</span>
+                <span className="bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent">Set</span>
               </h1>
-              <div className="flex items-center justify-center">
-                <div className="h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent w-32 mr-4"></div>
-                <p className="text-orange-400 text-xl font-semibold tracking-widest uppercase">
-                  Conectando Inteligência e Tecnologia
-                </p>
-                <div className="h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent w-32 ml-4"></div>
-              </div>
+              <div className="h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent w-16 mr-2"></div>
+              <p className="text-orange-400 text-xs font-medium tracking-wide">
+                Conectando Inteligência e Tecnologia
+              </p>
+              <div className="h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent w-16 ml-2"></div>
             </div>
 
-            {/* Título Principal com destaque */}
-            <div className="mt-16 mb-12">
-              <div className="inline-block relative">
-                <h2 className="text-6xl font-black text-white mb-6 tracking-tight leading-tight">
-                  Company Search
-                </h2>
-                <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-orange-500 rounded-full"></div>
-              </div>
-              <p className="text-slate-300 text-xl leading-relaxed max-w-4xl mx-auto mt-8 font-light">
-                Plataforma inteligente para pesquisa e qualificação de leads B2B, integrando múltiplas fontes e 
-                <span className="text-blue-400 font-medium"> automação avançada</span> para gerar dados enriquecidos e 
-                <span className="text-orange-400 font-medium"> insights estratégicos</span>.
+            {/* Título Principal compacto */}
+            <div className="mb-3">
+              <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">
+                Company Search
+              </h2>
+              <p className="text-slate-300 text-sm leading-relaxed max-w-2xl mx-auto">
+                Plataforma inteligente para pesquisa e qualificação de leads B2B
               </p>
             </div>
 
-            {/* Features com design moderno */}
-            <div className="flex flex-wrap items-center justify-center mt-12 gap-6">
-              <div className="group flex items-center bg-gradient-to-r from-green-500/20 to-green-600/20 backdrop-blur-sm border border-green-500/30 px-6 py-3 rounded-full hover:from-green-500/30 hover:to-green-600/30 transition-all duration-300 transform hover:scale-105">
-                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3 group-hover:rotate-12 transition-transform duration-300">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+            {/* Features compactas */}
+            <div className="flex flex-wrap items-center justify-center gap-3 text-xs">
+              <div className="flex items-center bg-green-500/20 border border-green-500/30 px-3 py-1 rounded-full">
+                <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center mr-2">
+                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                   </svg>
                 </div>
-                <span className="text-white font-semibold">Busca Inteligente</span>
+                <span className="text-white font-medium">Busca Inteligente</span>
               </div>
 
-              <div className="group flex items-center bg-gradient-to-r from-blue-500/20 to-blue-600/20 backdrop-blur-sm border border-blue-500/30 px-6 py-3 rounded-full hover:from-blue-500/30 hover:to-blue-600/30 transition-all duration-300 transform hover:scale-105">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-3 group-hover:rotate-12 transition-transform duration-300">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <div className="flex items-center bg-blue-500/20 border border-blue-500/30 px-3 py-1 rounded-full">
+                <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center mr-2">
+                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clipRule="evenodd"/>
                   </svg>
                 </div>
-                <span className="text-white font-semibold">Exportação Avançada</span>
+                <span className="text-white font-medium">Exportação</span>
               </div>
 
-              <div className="group flex items-center bg-gradient-to-r from-purple-500/20 to-purple-600/20 backdrop-blur-sm border border-purple-500/30 px-6 py-3 rounded-full hover:from-purple-500/30 hover:to-purple-600/30 transition-all duration-300 transform hover:scale-105">
-                <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-3 group-hover:rotate-12 transition-transform duration-300">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <div className="flex items-center bg-purple-500/20 border border-purple-500/30 px-3 py-1 rounded-full">
+                <div className="w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center mr-2">
+                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
                   </svg>
                 </div>
-                <span className="text-white font-semibold">Apollo.io Powered</span>
+                <span className="text-white font-medium">Apollo.io</span>
               </div>
 
-              <div className="group flex items-center bg-gradient-to-r from-orange-500/20 to-orange-600/20 backdrop-blur-sm border border-orange-500/30 px-6 py-3 rounded-full hover:from-orange-500/30 hover:to-orange-600/30 transition-all duration-300 transform hover:scale-105">
-                <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center mr-3 group-hover:rotate-12 transition-transform duration-300">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <div className="flex items-center bg-orange-500/20 border border-orange-500/30 px-3 py-1 rounded-full">
+                <div className="w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center mr-2">
+                  <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
                   </svg>
                 </div>
-                <span className="text-white font-semibold">Leads B2B</span>
+                <span className="text-white font-medium">Leads B2B</span>
               </div>
-            </div>
-
-            {/* Indicador de scroll */}
-            <div className="mt-16 animate-bounce">
-              <svg className="w-6 h-6 text-slate-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
             </div>
           </div>
         </header>
