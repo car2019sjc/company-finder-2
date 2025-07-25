@@ -74,10 +74,13 @@ class ApolloApiService {
       throw new Error('Invalid endpoint provided');
     }
 
-    // Usar proxy local do Vite em ambos os ambientes
-    const url = `/api/apollo${endpoint}`;
+    // Usar configuração dinâmica baseada no ambiente
+    const baseUrl = getApiBaseUrl();
+    const url = baseUrl.includes('apollo.io') ? `${baseUrl}${endpoint}` : `${baseUrl}${endpoint}`;
+    
     console.log('🌐 Fazendo requisição para:', url);
     console.log('🔑 API Key presente:', !!this.apiKey);
+    console.log('🏠 Hostname:', window.location.hostname);
     
     const headers = {
       'Content-Type': 'application/json',
@@ -85,6 +88,13 @@ class ApolloApiService {
       'Accept': 'application/json',
       ...options.headers,
     };
+
+    // Se estiver usando API direta (não proxy), adicionar headers CORS
+    if (baseUrl.includes('apollo.io')) {
+      headers['Origin'] = window.location.origin;
+      headers['Access-Control-Request-Method'] = options.method || 'POST';
+      headers['Access-Control-Request-Headers'] = 'Content-Type, X-Api-Key, Accept';
+    }
 
     try {
       console.log('📡 Enviando requisição com headers:', Object.keys(headers));
