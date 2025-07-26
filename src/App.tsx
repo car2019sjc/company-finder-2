@@ -952,6 +952,15 @@ function App() {
             </div>
           </div>
         )}
+
+        {/* Rodapé */}
+        <footer className="mt-16 py-8 border-t border-gray-200">
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              © 2025 OnSet Tecnologia. Todos os direitos reservados.
+            </p>
+          </div>
+        </footer>
       </div>
     </div>
   );
